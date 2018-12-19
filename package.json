@@ -6,7 +6,9 @@
     "license": "MIT",
     "dependencies": {
         "body-parser": "^1.18.3",
+        "cors": "^2.8.5",
         "express": "^4.16.4",
+        "json2csv": "^4.3.2",
         "nodemon": "^1.18.9"
     },
     "devDependencies": {
@@ -14,8 +16,6 @@
     },
     "scripts": {
         "start": "node index.js",
-        "server": "nodemon index.js",
-        "client": "cd client && yarn start",
-        "dev": "concurrently --kill-others-on-fail \"yarn run server\" \"yarn run client\""
+        "server": "nodemon index.js"
     }
 }

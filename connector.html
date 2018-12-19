@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <title>Aira | IoT Project</title>
+    <body>
+        <h1 id="connected_NETPIE"></h1>
+        <p id="raw_data"></p>
+        <p id="get_topic"></p>
+        <script src="https://cdn.netpie.io/microgear.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script>
+            const APPID = 'AiraCO'
+            const KEY = 'Il8fwPqTTXGGwcX'
+            const SECRET = '1qCT5qfG77cYEa6GAh6YkpzRl'
+            const ALIAS = 'HTML_web' //  ชื่อตัวเอง
+            const thing1 = 'NodeMCU1' //  ชื่อเพื่อนที่จะคุย
+
+            var microgear = Microgear.create({
+                key: KEY,
+                secret: SECRET,
+                alias: ALIAS
+            })
+
+            microgear.on('connected', function() {
+                microgear.setAlias(ALIAS)
+                document.getElementById('connected_NETPIE').innerHTML =
+                    'Connected to NETPIE'
+            })
+            microgear.on('present', function(event) {
+                console.log(event)
+            })
+
+            microgear.on('absent', function(event) {
+                console.log(event)
+            })
+            microgear.on('message', function(topic, msg) {
+                document.getElementById('raw_data').innerHTML =
+                    'Data from Node MCU = ' + msg
+                document.getElementById('get_topic').innerHTML =
+                    'Topic = ' + topic
+                axios
+                    .post('http://localhost:5000/api/received_data', {
+                        msg: msg,
+                        date: new Date()
+                    })
+                    .then(function(response) {
+                        console.log(response)
+                    })
+                    .catch(function(error) {
+                        console.log(error)
+                    })
+            })
+
+            microgear.resettoken(function(err) {
+                microgear.connect(APPID)
+            })
+        </script>
+    </body>
+</html>
