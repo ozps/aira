@@ -11,10 +11,12 @@ app.use(cors())
 
 app.post('/api/write_data', (req, res) => {
     let co = ''
+    let d = req.body.date
+    console.log(d)
     for (x of req.body.msg) {
         if (!isNaN(x)) co += x
     }
-    let csv = '\n' + co + ',' + new Date()
+    let csv = '\n' + co + ',' + d
     fs.appendFile('data.csv', csv, function(err) {
         if (err) throw err
         console.log('Saved!')

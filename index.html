@@ -41,15 +41,14 @@
                     document.getElementById('get_topic').innerHTML =
                         'Topic = ' + topic
 
-                    var svg = d3
-                        .select('body')
-                        .append('svg')
-                        .attr('width', 960)
-                        .attr('height', 300)
-
                     var margin = { top: 20, right: 20, bottom: 30, left: 50 },
                         width = 960 - margin.left - margin.right,
                         height = 500 - margin.top - margin.bottom
+
+                    var parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%SZ')
+
+                    var x = d3.scaleTime().range([0, width])
+                    var y = d3.scaleLinear().range([height, 0])
 
                     var valueline = d3
                         .line()
@@ -61,7 +60,7 @@
                         })
 
                     var svg = d3
-                        .select('body')
+                        .select('#graph')
                         .append('svg')
                         .attr('width', width + margin.left + margin.right)
                         .attr('height', height + margin.top + margin.bottom)
@@ -71,12 +70,10 @@
                             'translate(' + margin.left + ',' + margin.top + ')'
                         )
 
-                    var x = d3.scaleTime().range([0, width])
-                    var y = d3.scaleLinear().range([height, 0])
-
                     d3.csv('data.csv', function(error, data) {
                         if (error) console.error(error)
                         data.forEach(function(d) {
+                            d.Date = parseTime(d.Date)
                             d.CO = +d.CO
                         })
 
