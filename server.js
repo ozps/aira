@@ -11,9 +11,9 @@ app.use(cors())
 
 app.post('/api/write_data', (req, res) => {
     let co = ''
-    let d = req.body.date
-    console.log(d)
-    for (x of req.body.msg) {
+    let d = req.body.date.substr(0, 19)
+    let m = req.body.msg.substr(4, 10)
+    for (x of m) {
         if (!isNaN(x)) co += x
     }
     let csv = '\n' + co + ',' + d

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+    <title>Aira | IoT Project</title>
+    <body>
+        <script src="https://cdn.netpie.io/microgear.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script>
+            const APPID = 'AiraCO'
+            const KEY = 'Il8fwPqTTXGGwcX'
+            const SECRET = '1qCT5qfG77cYEa6GAh6YkpzRl'
+            const ALIAS = 'HTML_web' //  ชื่อตัวเอง
+            const thing1 = 'NodeMCU1' //  ชื่อเพื่อนที่จะคุย
+
+            var microgear = Microgear.create({
+                key: KEY,
+                secret: SECRET,
+                alias: ALIAS
+            })
+
+            microgear.on('message', (topic, msg) => {
+                document.getElementById('raw_data').innerHTML =
+                    'Data from Node MCU = ' + msg
+                document.getElementById('get_topic').innerHTML =
+                    'Topic = ' + topic
+
+                var margin = { top: 20, right: 20, bottom: 30, left: 50 },
+                    width = 960 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom
+
+                var parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S')
+
+                var x = d3.scaleTime().range([0, width])
+                var y = d3.scaleLinear().range([height, 0])
+
+                var valueline = d3
+                    .line()
+                    .x(function(d) {
+                        return x(d.Date)
+                    })
+                    .y(function(d) {
+                        return y(d.CO)
+                    })
+
+                var svg = d3
+                    .select('#graph')
+                    .append('svg')
+                    .attr('width', width + margin.left + margin.right)
+                    .attr('height', height + margin.top + margin.bottom)
+                    .append('g')
+                    .attr(
+                        'transform',
+                        'translate(' + margin.left + ',' + margin.top + ')'
+                    )
+
+                d3.csv('data.csv', function(data) {
+                    data.forEach(function(d) {
+                        temp = d.Date
+                        d.Date = parseTime(d.Date)
+                        d.CO = +d.CO
+                        // console.log(d.Date, d.CO + 'OZ')
+                    })
+
+                    x.domain(
+                        d3.extent(data, function(d) {
+                            return d.Date
+                        })
+                    )
+                    y.domain([
+                        0,
+                        d3.max(data, function(d) {
+                            return d.CO
+                        })
+                    ])
+
+                    svg.append('path')
+                        .data([data])
+                        .attr('class', 'line')
+                        .attr('d', valueline)
+
+                    svg.append('g')
+                        .attr('transform', 'translate(0,' + height + ')')
+                        .call(d3.axisBottom(x))
+
+                    svg.append('g').call(d3.axisLeft(y))
+                })
+
+                axios
+                    .post('http://localhost:5000/api/write_data', {
+                        msg: msg,
+                        date: new Date()
+                    })
+                    .then(response => {
+                        console.log(response)
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    })
+            })
+            microgear.on('connected', () => {
+                microgear.setAlias(ALIAS)
+                document.getElementById('connected_NETPIE').innerHTML =
+                    'Connected to NETPIE'
+            })
+            microgear.on('present', event => {
+                console.log(event)
+            })
+
+            microgear.on('absent', event => {
+                console.log(event)
+            })
+
+            microgear.resettoken(function(err) {
+                microgear.connect(APPID)
+            })
+        </script>
+        <div>
+            <h1 id="connected_NETPIE"></h1>
+            <p id="raw_data"></p>
+            <p id="get_topic"></p>
+        </div>
+        <div id="graph"></div>
+    </body>
+</html>
