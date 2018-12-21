@@ -94,14 +94,26 @@
             $('#data-button-thr').click(() => {
                 thr = parseInt($('#data-thr').val())
             })
-            $('#label-bar').html('Threshold : ' + thr)
 
             var microgear = Microgear.create({
                 key: KEY,
                 secret: SECRET,
                 alias: ALIAS
             })
+
+            microgear.on('connected', () => {
+                microgear.setAlias(ALIAS)
+                $('#connection').html('Connected to NETPIE')
+            })
+            microgear.on('present', event => {
+                console.log(event)
+            })
+            microgear.on('absent', event => {
+                console.log(event)
+            })
+
             microgear.on('message', (topic, msg) => {
+                console.log(msg)
                 $('#data-co').html('Data : ' + msg)
                 $('#data-topic').html('Topic : ' + topic)
                 let CO = ''
@@ -114,7 +126,7 @@
                 if (bar >= 80) $('#alert-bar').addClass('bg-danger')
                 else $('#alert-bar').removeClass('bg-danger')
                 $('#alert-bar').css('width', bar + '%')
-
+                $('#label-bar').html('Threshold : ' + thr)
                 if (CO > thr) {
                     $('#data-status').css('color', 'red')
                     $('#data-status').html('Status : Please Avoid This Place!')
@@ -123,17 +135,8 @@
                     $('#data-status').html('Status : Normal :)')
                 }
             })
-            microgear.on('connected', () => {
-                microgear.setAlias(ALIAS)
-                $('@connection').html('Connected to NETPIE')
-            })
-            microgear.on('present', event => {
-                console.log(event)
-            })
-            microgear.on('absent', event => {
-                console.log(event)
-            })
-            microgear.resettoken(function(err) {
+
+            microgear.resettoken(err => {
                 microgear.connect(APPID)
             })
         </script>
